@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camanor - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="icon" href="img/favicon.ico">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="img/logo_camanor.png" alt="Camanor" class="sidebar-logo">
+                <button id="close-sidebar" class="btn-icon">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="dashboard.html">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="ciclo-dashboard.html">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Ciclos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="analises.html">
+                            <i class="fas fa-flask"></i>
+                            <span>Análises</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-shrimp"></i>
+                            <span>Tanques</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Estoque</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-users"></i>
+                            <span>Usuários</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="contato.html">
+                            <i class="fas fa-envelope"></i>
+                            <span>Contato</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-cog"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="index.html" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sair</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <button id="sidebar-toggle" class="btn-icon">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="search-container">
+                    <input type="text" placeholder="Buscar..." class="search-input">
+                    <button class="btn-icon">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="btn-icon notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
+                    <div class="user-profile">
+                        <img src="img/use.png" alt="Usuário" class="profile-img">
+                        <span class="profile-name">João Silva</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <h1 class="page-title animate-on-load">Dashboard</h1>
+                
+                <!-- Stats Cards -->
+                <div class="dashboard-cards">
+                    <div class="card animate-on-load">
+                        <div class="card-content">
+                            <div class="card-info">
+                                <h3 class="card-title">Análises Totais</h3>
+                                <p class="card-value">1,234</p>
+                                <p class="card-trend up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>12% desde o último mês</span>
+                                </p>
+                            </div>
+                            <div class="card-icon">
+                                <canvas id="analises-chart" width="60" height="60"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card animate-on-load" style="animation-delay: 0.1s;">
+                        <div class="card-content">
+                            <div class="card-info">
+                                <h3 class="card-title">Ciclos Ativos</h3>
+                                <p class="card-value">42</p>
+                                <p class="card-trend up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>8% desde o último mês</span>
+                                </p>
+                            </div>
+                            <div class="card-icon">
+                                <canvas id="ciclos-chart" width="60" height="60"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card animate-on-load" style="animation-delay: 0.2s;">
+                        <div class="card-content">
+                            <div class="card-info">
+                                <h3 class="card-title">Produção Total</h3>
+                                <p class="card-value">8,543 kg</p>
+                                <p class="card-trend up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>15% desde o último mês</span>
+                                </p>
+                            </div>
+                            <div class="card-icon">
+                                <canvas id="producao-chart" width="60" height="60"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card animate-on-load" style="animation-delay: 0.3s;">
+                        <div class="card-content">
+                            <div class="card-info">
+                                <h3 class="card-title">Taxa de Conclusão</h3>
+                                <p class="card-value">87%</p>
+                                <p class="card-trend down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>3% desde o último mês</span>
+                                </p>
+                            </div>
+                            <div class="card-icon">
+                                <canvas id="conclusao-chart" width="60" height="60"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Charts -->
+                <div class="row">
+                    <div class="col-lg-8 animate-on-load">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Produção Mensal</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="main-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 animate-on-load">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Distribuição por Categoria</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="pie-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tanques de Destaque -->
+                <div class="row">
+                    <div class="col-lg-8 animate-on-load">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Tanques com Maior Crescimento</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="crescimento-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 animate-on-load">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Distribuição por Tanque</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="distribuicao-tanques-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mortalidade -->
+                <div class="row">
+                    <div class="col-lg-8 animate-on-load">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Tanques com Menor Mortalidade</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="mortalidade-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 animate-on-load">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Taxa de Sobrevivência Média</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="sobrevivencia-media-chart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity Table -->
+                <div class="table-container animate-on-load">
+                    <div class="table-header">
+                        <h3 class="table-title">Atividades Recentes</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Atividade</th>
+                                    <th>Responsável</th>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#1234</td>
+                                    <td>Coleta de Parâmetros</td>
+                                    <td>Maria Santos</td>
+                                    <td>05/05/2025</td>
+                                    <td><span class="badge badge-success">Concluído</span></td>
+                                    <td>
+                                        <button class="btn-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#1233</td>
+                                    <td>Arraçoamento</td>
+                                    <td>Carlos Oliveira</td>
+                                    <td>05/05/2025</td>
+                                    <td><span class="badge badge-success">Concluído</span></td>
+                                    <td>
+                                        <button class="btn-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#1232</td>
+                                    <td>Biometria</td>
+                                    <td>Ana Silva</td>
+                                    <td>04/05/2025</td>
+                                    <td><span class="badge badge-warning">Pendente</span></td>
+                                    <td>
+                                        <button class="btn-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#1231</td>
+                                    <td>Manutenção</td>
+                                    <td>Pedro Costa</td>
+                                    <td>04/05/2025</td>
+                                    <td><span class="badge badge-danger">Atrasado</span></td>
+                                    <td>
+                                        <button class="btn-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#1230</td>
+                                    <td>Coleta de Parâmetros</td>
+                                    <td>Maria Santos</td>
+                                    <td>03/05/2025</td>
+                                    <td><span class="badge badge-success">Concluído</span></td>
+                                    <td>
+                                        <button class="btn-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/dashboard-charts-new.js"></script>
+    <script>
+        // Initialize dashboard data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof loadDashboardData === 'function') {
+                loadDashboardData();
+            }
+            
+            if (typeof loadNotifications === 'function') {
+                loadNotifications();
+            }
+        });
+    </script>
+</body>
+</html>

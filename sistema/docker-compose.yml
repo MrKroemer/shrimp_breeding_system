@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  php:
+    build: ./docker/php/
+    image: php
+    ports:
+      - 8080:80
+    volumes:
+      - ./:/var/www/html

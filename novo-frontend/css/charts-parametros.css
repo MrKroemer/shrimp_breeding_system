@@ -1,0 +1,41 @@
+/* charts-parametros.css */
+.form-centralized-data {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.form-centralized-data .form-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+}
+.btnNew {
+    background: #e56c69;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1.2rem;
+    transition: background 0.2s;
+}
+.btnNew:hover {
+    background: #ffb0b0;
+}
+#graficos-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: flex-start;
+}
+canvas {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}

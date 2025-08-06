@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camanor - Análises</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/attachments.css">
+    <link rel="icon" href="img/favicon.ico">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="img/logo_camanor.png" alt="Camanor" class="sidebar-logo">
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="dashboard.html" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-home"></i></span>
+                        <span class="sidebar-menu-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item active">
+                    <a href="analises.html" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-chart-line"></i></span>
+                        <span class="sidebar-menu-text">Análises</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-flask"></i></span>
+                        <span class="sidebar-menu-text">Análises Bacteriológicas</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-vial"></i></span>
+                        <span class="sidebar-menu-text">Análises Bioensaios</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-microscope"></i></span>
+                        <span class="sidebar-menu-text">Análises Biométricas</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-prescription-bottle"></i></span>
+                        <span class="sidebar-menu-text">Aplicações de Insumos</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-shrimp"></i></span>
+                        <span class="sidebar-menu-text">Arraçoamentos</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-users"></i></span>
+                        <span class="sidebar-menu-text">Usuários</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-cog"></i></span>
+                        <span class="sidebar-menu-text">Configurações</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <button id="sidebar-toggle" class="btn-icon">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="user-menu">
+                    <div class="notification-container">
+                        <button class="btn-icon notification-btn" id="notification-toggle">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge-icon">3</span>
+                        </button>
+                        
+                        <!-- Dropdown de Notificações -->
+                        <div class="notifications-dropdown" id="notifications-dropdown">
+                            <div class="notifications-header">
+                                <h3>Notificações</h3>
+                                <button class="mark-all-read">Marcar todas como lidas</button>
+                            </div>
+                            <div class="notifications-body">
+                                <div class="notification-item unread" data-user="maria" data-chat-id="maria">
+                                    <img src="img/user1.jpg" alt="Maria Santos" class="notification-avatar">
+                                    <div class="notification-content">
+                                        <div class="notification-title">Maria Santos</div>
+                                        <div class="notification-message">Precisamos verificar os parâmetros do tanque V03 hoje.</div>
+                                        <div class="notification-time">10:30</div>
+                                    </div>
+                                </div>
+                                <div class="notification-item unread" data-user="carlos" data-chat-id="carlos">
+                                    <img src="img/user2.jpg" alt="Carlos Oliveira" class="notification-avatar">
+                                    <div class="notification-content">
+                                        <div class="notification-title">Carlos Oliveira</div>
+                                        <div class="notification-message">O relatório de biometria está concluído. Preciso da sua aprovação.</div>
+                                        <div class="notification-time">09:15</div>
+                                    </div>
+                                </div>
+                                <div class="notification-item unread" data-user="ana" data-chat-id="ana">
+                                    <img src="img/user3.jpg" alt="Ana Silva" class="notification-avatar">
+                                    <div class="notification-content">
+                                        <div class="notification-title">Ana Silva</div>
+                                        <div class="notification-message">Precisamos discutir o arraçoamento do ciclo #42 com urgência.</div>
+                                        <div class="notification-time">Ontem</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="notifications-footer">
+                                <a href="messenger.html">Ver todas as mensagens</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <img src="img/profile.jpg" alt="Usuário" class="user-avatar">
+                    <div class="user-info">
+                        <span class="user-name">João Silva</span>
+                        <span class="user-role">Administrador</span>
+                        <div class="user-status-selector">
+                            <span class="current-status">
+                                <span class="status-badge status-online"></span>
+                                <span class="status-text">Online</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </span>
+                            <div class="status-dropdown">
+                                <div class="status-option" data-status="online">
+                                    <span class="status-badge status-online"></span>
+                                    <span>Online</span>
+                                </div>
+                                <div class="status-option" data-status="away">
+                                    <span class="status-badge status-away"></span>
+                                    <span>Ausente</span>
+                                </div>
+                                <div class="status-option" data-status="busy">
+                                    <span class="status-badge status-busy"></span>
+                                    <span>Ocupado</span>
+                                </div>
+                                <div class="status-option" data-status="offline">
+                                    <span class="status-badge status-offline"></span>
+                                    <span>Aparecer Offline</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Page Content -->
+            <div class="page-content">
+                <div class="page-header animate-on-load">
+                    <h1 class="page-title">Análises</h1>
+                    <div class="page-actions">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Nova Análise
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filter Section -->
+                <div class="filter-section card animate-on-load">
+                    <div class="card-body">
+                        <form class="filter-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="filter-type" class="form-label">Tipo de Análise</label>
+                                    <select id="filter-type" class="form-control">
+                                        <option value="">Todos os tipos</option>
+                                        <option value="bacteriologica">Bacteriológica</option>
+                                        <option value="bioensaio">Bioensaio</option>
+                                        <option value="biometrica">Biométrica</option>
+                                        <option value="calcica">Cálcica</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="filter-date-start" class="form-label">Data Inicial</label>
+                                    <input type="date" id="filter-date-start" class="form-control">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="filter-date-end" class="form-label">Data Final</label>
+                                    <input type="date" id="filter-date-end" class="form-control">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="filter-status" class="form-label">Status</label>
+                                    <select id="filter-status" class="form-control">
+                                        <option value="">Todos</option>
+                                        <option value="concluido">Concluído</option>
+                                        <option value="em_andamento">Em andamento</option>
+                                        <option value="pendente">Pendente</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Filtrar
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="fas fa-undo"></i> Limpar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Table Section -->
+                <div class="table-container animate-on-load">
+                    <div class="table-header">
+                        <h3 class="table-title">Análises Recentes</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <table class="table data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tipo</th>
+                                <th>Data</th>
+                                <th>Responsável</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1001</td>
+                                <td>Bacteriológica</td>
+                                <td>03/05/2025</td>
+                                <td>Maria Santos</td>
+                                <td><span class="status-badge status-concluido">Concluído</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1002</td>
+                                <td>Bioensaio</td>
+                                <td>02/05/2025</td>
+                                <td>Carlos Oliveira</td>
+                                <td><span class="status-badge status-em-andamento">Em andamento</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1003</td>
+                                <td>Biométrica</td>
+                                <td>01/05/2025</td>
+                                <td>Ana Silva</td>
+                                <td><span class="status-badge status-concluido">Concluído</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1004</td>
+                                <td>Cálcica</td>
+                                <td>30/04/2025</td>
+                                <td>Roberto Almeida</td>
+                                <td><span class="status-badge status-pendente">Pendente</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1005</td>
+                                <td>Bacteriológica</td>
+                                <td>29/04/2025</td>
+                                <td>Juliana Costa</td>
+                                <td><span class="status-badge status-concluido">Concluído</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="table-footer">
+                        <div class="table-info">Mostrando 1-5 de 28 itens</div>
+                        <ul class="pagination">
+                            <li class="pagination-item">
+                                <a href="#" class="pagination-link">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            <li class="pagination-item">
+                                <a href="#" class="pagination-link active">1</a>
+                            </li>
+                            <li class="pagination-item">
+                                <a href="#" class="pagination-link">2</a>
+                            </li>
+                            <li class="pagination-item">
+                                <a href="#" class="pagination-link">3</a>
+                            </li>
+                            <li class="pagination-item">
+                                <a href="#" class="pagination-link">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Summary Cards -->
+                <div class="dashboard-cards animate-on-load">
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">Total de Análises</h3>
+                            <div class="dashboard-card-icon" style="background-color: #0056b3;">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                        </div>
+                        <div class="dashboard-card-value">28</div>
+                        <div class="dashboard-card-label">Últimos 30 dias</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">Concluídas</h3>
+                            <div class="dashboard-card-icon" style="background-color: #28a745;">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="dashboard-card-value">18</div>
+                        <div class="dashboard-card-label">64% do total</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">Em Andamento</h3>
+                            <div class="dashboard-card-icon" style="background-color: #ffc107;">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="dashboard-card-value">7</div>
+                        <div class="dashboard-card-label">25% do total</div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">Pendentes</h3>
+                            <div class="dashboard-card-icon" style="background-color: #dc3545;">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                        </div>
+                        <div class="dashboard-card-value">3</div>
+                        <div class="dashboard-card-label">11% do total</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Chat Flutuante -->
+    <div class="floating-chat-container" id="floating-chat-container">
+        <!-- Botão de Chat -->
+        <div class="chat-toggle-btn" id="chat-toggle-btn">
+            <i class="fas fa-comments"></i>
+            <span class="badge" id="chat-badge" style="display: none;">0</span>
+        </div>
+        
+        <!-- As janelas de chat serão adicionadas dinamicamente aqui -->
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/floating-chat.js"></script>
+    <script src="js/user-status.js"></script>
+    <script src="js/group-chat.js"></script>
+    <script src="js/file-attachments.js"></script>
+</body>
+</html>

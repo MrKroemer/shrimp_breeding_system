@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camanor - Contato</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="icon" href="img/favicon.ico">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="img/logo_camanor.png" alt="Camanor" class="sidebar-logo">
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="dashboard.html" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-home"></i></span>
+                        <span class="sidebar-menu-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="analises.html" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-chart-line"></i></span>
+                        <span class="sidebar-menu-text">Análises</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-flask"></i></span>
+                        <span class="sidebar-menu-text">Análises Bacteriológicas</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-vial"></i></span>
+                        <span class="sidebar-menu-text">Análises Bioensaios</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-microscope"></i></span>
+                        <span class="sidebar-menu-text">Análises Biométricas</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-prescription-bottle"></i></span>
+                        <span class="sidebar-menu-text">Aplicações de Insumos</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-shrimp"></i></span>
+                        <span class="sidebar-menu-text">Arraçoamentos</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-users"></i></span>
+                        <span class="sidebar-menu-text">Usuários</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item active">
+                    <a href="contato.html" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-envelope"></i></span>
+                        <span class="sidebar-menu-text">Contato</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link">
+                        <span class="sidebar-menu-icon"><i class="fas fa-cog"></i></span>
+                        <span class="sidebar-menu-text">Configurações</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <button id="sidebar-toggle" class="btn-icon">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="user-menu">
+                    <div class="notification-dropdown">
+                        <button class="btn-icon" id="notification-button">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge" id="notification-badge">3</span>
+                        </button>
+                        <div class="dropdown-menu" id="notification-list">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <img src="img/user.png" alt="User" class="user-avatar">
+                    <div class="user-info">
+                        <span class="user-name">João Silva</span>
+                        <span class="user-role">Administrador</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Page Content -->
+            <div class="page-content">
+                <div class="page-header animate-on-load">
+                    <h1 class="page-title">Contato</h1>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-8 animate-on-load">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Envie uma Mensagem</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="contact-form">
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label for="name" class="form-label">Nome</label>
+                                            <input type="text" id="name" class="form-control" placeholder="Seu nome" required>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" id="email" class="form-control" placeholder="Seu email" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="subject" class="form-label">Assunto</label>
+                                        <input type="text" id="subject" class="form-control" placeholder="Assunto da mensagem" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="message" class="form-label">Mensagem</label>
+                                        <textarea id="message" class="form-control" rows="5" placeholder="Digite sua mensagem" required></textarea>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary">
+                                            Enviar Mensagem <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <div id="contact-alert" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 animate-on-load">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Informações de Contato</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="contact-text">
+                                            <h4>Endereço</h4>
+                                            <p>Av. Principal, 1234<br>Natal, RN - Brasil</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <div class="contact-text">
+                                            <h4>Telefone</h4>
+                                            <p>+55 (84) 3232-1234</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="contact-text">
+                                            <h4>Email</h4>
+                                            <p>contato@camanor.com.br</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="contact-text">
+                                            <h4>Horário de Atendimento</h4>
+                                            <p>Segunda a Sexta: 8h às 18h<br>Sábado: 8h às 12h</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="social-links">
+                                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Script específico para a página de contato
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Obter valores do formulário
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const subject = document.getElementById('subject').value;
+                    const message = document.getElementById('message').value;
+                    
+                    // Validação simples
+                    let isValid = true;
+                    let errors = [];
+                    
+                    if (!name) {
+                        isValid = false;
+                        errors.push('Por favor, insira seu nome.');
+                        document.getElementById('name').classList.add('is-invalid');
+                    } else {
+                        document.getElementById('name').classList.remove('is-invalid');
+                    }
+                    
+                    if (!email || !validateEmail(email)) {
+                        isValid = false;
+                        errors.push('Por favor, insira um email válido.');
+                        document.getElementById('email').classList.add('is-invalid');
+                    } else {
+                        document.getElementById('email').classList.remove('is-invalid');
+                    }
+                    
+                    if (!subject) {
+                        isValid = false;
+                        errors.push('Por favor, insira o assunto da mensagem.');
+                        document.getElementById('subject').classList.add('is-invalid');
+                    } else {
+                        document.getElementById('subject').classList.remove('is-invalid');
+                    }
+                    
+                    if (!message) {
+                        isValid = false;
+                        errors.push('Por favor, insira sua mensagem.');
+                        document.getElementById('message').classList.add('is-invalid');
+                    } else {
+                        document.getElementById('message').classList.remove('is-invalid');
+                    }
+                    
+                    // Exibir erros ou enviar formulário
+                    const alertContainer = document.getElementById('contact-alert');
+                    if (!isValid) {
+                        alertContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                ${errors.map(error => `<p>${error}</p>`).join('')}
+                            </div>
+                        `;
+                    } else {
+                        alertContainer.innerHTML = `
+                            <div class="alert alert-success">
+                                <p>Mensagem enviada com sucesso! Entraremos em contato em breve.</p>
+                            </div>
+                        `;
+                        
+                        // Limpar formulário
+                        contactForm.reset();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

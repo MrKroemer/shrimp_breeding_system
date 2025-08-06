@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coleta de Parâmetros</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/coletas-parametros.css">
+    <script defer src="js/coletas-parametros.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="img/logo_camanor.png" alt="Camanor" class="sidebar-logo">
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                    <li><a href="coletas-parametros.html" class="active"><i class="fas fa-vial"></i><span>Coleta de Parâmetros</span></a></li>
+                    <li><a href="biometrias.html"><i class="fas fa-fish"></i><span>Biometrias</span></a></li>
+                    <li><a href="insumos.html"><i class="fas fa-flask"></i><span>Insumos</span></a></li>
+                    <li><a href="arracoamentos.html"><i class="fas fa-tractor"></i><span>Arracoamentos</span></a></li>
+                    <li><a href="povoamentos.html"><i class="fas fa-water"></i><span>Povoamentos</span></a></li>
+                    <li><a href="estoque.html"><i class="fas fa-box"></i><span>Estoque</span></a></li>
+                    <li><a href="usuarios.html"><i class="fas fa-users"></i><span>Usuários</span></a></li>
+                    <li><a href="relatorios.html"><i class="fas fa-chart-bar"></i><span>Relatórios</span></a></li>
+                    <li><a href="dashboards.html"><i class="fas fa-chart-pie"></i><span>Dashboards</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <h1>Coleta de Parâmetros</h1>
+            <section class="search-section">
+                <form id="search-coletas-form" class="form-inline">
+                    <input type="date" name="data_coleta" id="data_coleta" placeholder="Data da coleta">
+                    <select name="setor_id" id="setor_id">
+                        <option value="">Setor</option>
+                    </select>
+                    <select name="parametro_id" id="parametro_id">
+                        <option value="">Parâmetro</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                    <button type="button" id="btn-add-coleta" class="btn btn-success">Adicionar</button>
+                </form>
+            </section>
+            <section class="table-section">
+                <table id="coletas-table" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Data da Coleta</th>
+                            <th>Setor</th>
+                            <th>Parâmetro</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados dinâmicos -->
+                    </tbody>
+                </table>
+            </section>
+            <section id="coleta-form-section" class="modal hidden">
+                <form id="coleta-form">
+                    <h2 id="form-title">Nova Coleta de Parâmetros</h2>
+                    <label for="form_data_coleta">Data da coleta:</label>
+                    <input type="date" name="form_data_coleta" id="form_data_coleta" required>
+                    <label for="form_setor_id">Setor:</label>
+                    <select name="form_setor_id" id="form_setor_id" required></select>
+                    <label for="form_parametro_id">Parâmetro:</label>
+                    <select name="form_parametro_id" id="form_parametro_id" required></select>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" id="btn-cancel" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

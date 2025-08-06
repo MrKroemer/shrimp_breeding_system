@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Http\Controllers\Reports;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Reports\ConsumoProdutosReport;
+use App\Http\Requests\ConsumoProdutosReportCreateFormRequest;
+use App\Models\Ciclos;
+use App\Models\Produtos;
+use App\Models\VwEstoqueSaidas;
+use Carbon\Carbon;
+
+class ConsumoProdutosController extends Controller
+{
+    public function createConsumoProdutos()
+    {
+        $ciclos = Ciclos::where('filial_id', session('_filial')->id)
+        ->whereBetween('situacao', [5, 8]) // Povoamento, Engorda, Despesca, Encerrado
+        ->orderBy('numero', 'desc')
+        ->get();
+
+        $produtos = Produtos::where('filial_id', session('_filial')->id)
+        ->orderBy('nome', 'asc')
+        ->get();
+
+        return view('reports.consumo_produtos.create')
+        ->with('ciclos',   $ciclos)
+        ->with('produtos', $produtos);
+    }
+
+    public function generateConsumoProdutos(ConsumoProdutosReportCreateFormRequest $request)
+    {
+        $data = $request->except(['_token']);
+
+        $ciclos = Ciclos::whereIn('id', $data['ciclos'])
+        ->get();
+
+        $estoque_saidas = [];
+
+        foreach ($ciclos as $ciclo) {
+
+            $saidas = VwEstoqueSaidas::where('filial_id', session('_filial')->id)
+            ->where('ciclo_id', $ciclo->id)
+            ->whereBetween('data_movimento', [$data['data_inicial'], $data['data_final']]);
+
+            if (! empty($data['produtos'])) {
+                $saidas->whereIn('produto_id', $data['produtos']);
+            }
+
+            $saidas->orderBy('data_movimento', 'desc')
+                   ->orderBy('produto_nome',   'asc');
+
+            $estoque_saidas[$ciclo->id] = $saidas->get();
+
+        }
+
+        $document = new ConsumoProdutosReport();
+        
+        $document->MakeDocument([$ciclos, $estoque_saidas, $data['data_inicial'], $data['data_final']]);
+        
+        $fileName = 'consumo_produtos_' . date('Y-m-d_H-i-s') . '.pdf';
+
+        return $document->Output($fileName, 'I');
+    }
+}

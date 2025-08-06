@@ -1,0 +1,307 @@
+/* Estilos para o sistema de anexos de arquivos */
+
+/* Container de prévia de anexos */
+.attachment-preview-container {
+    display: none;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* Item de prévia de anexo */
+.attachment-preview {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+    position: relative;
+    max-width: 200px;
+}
+
+/* Imagem de prévia */
+.attachment-preview-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.attachment-preview-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Ícone de prévia para não-imagens */
+.attachment-preview-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background-color: #f1f3f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.attachment-preview-icon i {
+    font-size: 20px;
+    color: #6c757d;
+}
+
+/* Informações do arquivo */
+.attachment-preview-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.attachment-preview-name {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.attachment-preview-size {
+    font-size: 10px;
+    color: #6c757d;
+}
+
+/* Botão para remover anexo */
+.attachment-preview-remove {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 10px;
+    padding: 0;
+}
+
+.attachment-preview-remove:hover {
+    background-color: #c82333;
+}
+
+/* Estilo para quando arrastar arquivos sobre a área de chat */
+.chat-messages.drag-over,
+.chat-window-messages.drag-over {
+    background-color: rgba(0, 123, 255, 0.05);
+    border: 2px dashed #007bff;
+}
+
+/* Anexos em mensagens */
+.message-attachments {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.message-attachment {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.message-attachment:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.message-attachment-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    background-color: #f1f3f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.message-attachment-icon i {
+    font-size: 16px;
+    color: #6c757d;
+}
+
+.message-attachment-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.message-attachment-name {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.message-attachment-size {
+    font-size: 10px;
+    color: #6c757d;
+}
+
+.message-attachment-image {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.message-attachment-image img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Notificações de anexo */
+.attachment-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    background-color: #343a40;
+    color: white;
+    font-size: 14px;
+    z-index: 2000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease;
+}
+
+.attachment-notification.info {
+    background-color: #17a2b8;
+}
+
+.attachment-notification.success {
+    background-color: #28a745;
+}
+
+.attachment-notification.warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.attachment-notification.error {
+    background-color: #dc3545;
+}
+
+.attachment-notification.fade-out {
+    animation: fadeOut 0.3s ease;
+}
+
+/* Modal de visualização de anexos */
+.attachment-viewer-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.attachment-viewer-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.attachment-viewer-content {
+    max-width: 90%;
+    max-height: 90%;
+    position: relative;
+}
+
+.attachment-viewer-image {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.attachment-viewer-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.attachment-viewer-download {
+    position: absolute;
+    bottom: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.attachment-viewer-filename {
+    position: absolute;
+    bottom: -40px;
+    left: 0;
+    color: white;
+    font-size: 14px;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}

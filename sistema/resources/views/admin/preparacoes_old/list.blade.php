@@ -1,0 +1,135 @@
+@extends('adminlte::page')
+
+@section('title', 'Registro de preparações de cultivos')
+
+@section('content_header')
+<h1>Listagem de preparações de cultivos</h1>
+
+<ol class="breadcrumb">
+    <li><a href="">Dashboard</a></li>
+    <li><a href="">Preparações de cultivos</a></li>
+</ol>
+@endsection
+
+@section('content')
+
+@include('admin.includes.alerts')
+
+<div class="box">
+    <div class="box-header">
+        <form action="{{ route('admin.preparacoes_v2.to_search') }}" method="POST" class="form form-inline">
+            {!! csrf_field() !!}
+            <div class="form-group">
+                <select name="ciclo_id" class="form-control" style="width: 185px;">
+                    <option value="">..:: Selecione ::..</option>
+                    @foreach($ciclos as $ciclo)
+                        <option value="{{ $ciclo->id }}">{{ $ciclo->tanque->sigla }} ( Ciclo Nº {{ $ciclo->numero }} )</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <a onclick="clearDateValue(this);"><i class="fa fa-calendar"></i></a>
+                    </div>
+                    <input type="text" name="data_inicio" placeholder="Data do início" class="form-control pull-right" id="datetime_picker">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <a onclick="clearDateValue(this);"><i class="fa fa-calendar"></i></a>
+                    </div>
+                    <input type="text" name="data_fim" placeholder="Data do fim" class="form-control pull-right" id="datetime_picker">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fa fa-search" aria-hidden="true"></i> Buscar</button>
+            <a href="{{ route('admin.preparacoes_v2.to_create') }}" class="btn btn-success">
+                <i class="fa fa-plus" aria-hidden="true"></i> Adicionar
+            </a>
+        </form>
+    </div>
+    <div class="box-body">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cultivo</th>
+                    <th>Data de início</th>
+                    <th>Data de fim</th>
+                    <th>Qtd. de aplicações</th>
+                    <th>Período da preparação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($preparacoes as $preparacao)
+                    @php 
+                        $cicloSituacao = $preparacao->ciclo->verificarSituacao([2, 3, 4]);
+                    @endphp
+                    <tr>
+                        <td>{{ $preparacao->id }}</td>
+                        <td>{{ $preparacao->ciclo->tanque->sigla }} ( Ciclo Nº {{ $preparacao->ciclo->numero }} )</td>
+                        <td>{{ $preparacao->data_inicio() }}</td>
+                        <td>{{ $preparacao->data_fim() ?: '- - / - - / - - - -' }}</td>
+                        <td>{{ $preparacao->aplicacoes->count() }} aplicações de produtos</td>
+                        <td>
+                            @if ($cicloSituacao)
+                                <form id="form_situacao_{{ $preparacao->id }}" action="{{ route('admin.preparacoes_v2.to_turn', ['id' => $preparacao->id]) }}" method="POST">
+                                    {!! csrf_field() !!}
+                                    <select name="situacao" class="form-control" onchange="onActionForSubmit('form_situacao_{{ $preparacao->id }}')">
+                                        @foreach($situacoes as $key => $value)
+                                            <option value="{{ $key }}" {{ ($key == $preparacao->ciclo->situacao) ? 'selected' : '' }}>{{ $value }}</option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            @else
+                                <p style="font-weight:bold;color:red;">PREPARAÇÃO ENCERRADA</p>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Mais opções <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ route('admin.preparacoes_v2.aplicacoes', ['preparacao_id' => $preparacao->id]) }}"><i class="fa fa-chevron-circle-right" aria-hidden="true"></i>Aplicações de produtos</a></li>
+                                    @if ($preparacao->ciclo->situacao == 4 && $preparacao->aplicacoes->count() > 0)
+                                        <li><a href="{{ route('admin.preparacoes_v2.validacoes', ['preparacao_id' => $preparacao->id]) }}"><i class="fa fa-chevron-circle-right" aria-hidden="true"></i>Validações e estornos</a></li>
+                                    @endif
+                                </ul>
+                            </div>
+                            @if ($cicloSituacao)
+                                <a href="{{ route('admin.preparacoes_v2.to_edit', ['id' => $preparacao->id]) }}" class="btn btn-primary btn-xs">
+                                    <i class="fa fa-trash" aria-hidden="true"></i> Editar
+                                </a>
+
+                                @if ($preparacao->ciclo->situacao == 4 && $preparacao->aplicacoes->count() > 0)
+                                    <button type="button" onclick="onActionForRequest('{{ route('admin.preparacoes_v2.to_close', ['id' => $preparacao->id]) }}');" class="btn btn-warning btn-xs">
+                                        <i class="fa fa-check" aria-hidden="true"></i> Encerrar
+                                    </button>
+                                @endif
+                                
+                                @if ($preparacao->situacao == 'N' && $preparacao->aplicacoes->count() <= 0)
+                                    <button type="button" onclick="onActionForRequest('{{ route('admin.preparacoes_v2.to_remove', ['id' => $preparacao->id]) }}');" class="btn btn-danger btn-xs">
+                                        <i class="fa fa-edit" aria-hidden="true"></i> Excluir
+                                    </button>
+                                @endif
+                            @else
+                                <a href="{{ route('admin.preparacoes_v2.to_view', ['id' => $preparacao->id]) }}" class="btn btn-primary btn-xs">
+                                    <i class="fa fa-eye" aria-hidden="true"></i> Visualizar
+                                </a>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+        @if(isset($formData))
+            {!! $preparacoes->appends($formData)->links() !!}
+        @else
+            {!! $preparacoes->links() !!}
+        @endif
+    </div>
+</div>
+@endsection

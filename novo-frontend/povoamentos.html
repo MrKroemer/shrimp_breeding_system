@@ -1,0 +1,46 @@
+<!-- Página de Povoamentos -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Povoamentos</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/povoamentos.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="img/logo_camanor.png" alt="Camanor" class="sidebar-logo">
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+          <li><a href="ciclo-dashboard.html"><i class="fas fa-chart-line"></i><span>Ciclos</span></a></li>
+          <li><a href="analises.html"><i class="fas fa-flask"></i><span>Análises</span></a></li>
+          <li><a href="#"><i class="fas fa-shrimp"></i><span>Tanques</span></a></li>
+          <li><a href="estoque.html"><i class="fas fa-warehouse"></i><span>Estoque</span></a></li>
+          <li><a href="arracoamentos.html"><i class="fas fa-fish"></i><span>Arracoamentos</span></a></li>
+          <li><a href="insumos.html"><i class="fas fa-vial"></i><span>Insumos</span></a></li>
+          <li><a href="povoamentos.html"><i class="fas fa-water"></i><span>Povoamentos</span></a></li>
+          <li><a href="usuarios.html"><i class="fas fa-users"></i><span>Usuários</span></a></li>
+          <li><a href="relatorios.html"><i class="fas fa-file-alt"></i><span>Relatórios</span></a></li>
+          <li><a href="dashboards.html"><i class="fas fa-chart-pie"></i><span>Dashboards</span></a></li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <div class="container">
+        <h2>Povoamentos</h2>
+        <div id="povoamentos-table-container"></div>
+        <button id="novo-povoamento">Novo Povoamento</button>
+        <div id="povoamentos-form-container" style="display:none;"></div>
+      </div>
+    </main>
+  </div>
+  <script src="js/povoamentos.js"></script>
+</body>
+</html>

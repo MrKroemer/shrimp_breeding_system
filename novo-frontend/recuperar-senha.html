@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camanor - Recuperar Senha</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="icon" href="img/favicon.ico">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card card">
+            <div class="login-logo">
+                <img src="img/logo_camanor.png" alt="Camanor" class="animate-on-load">
+            </div>
+            
+            <h2 class="login-title animate-on-load">Recuperação de Senha</h2>
+            
+            <div id="alert-container"></div>
+            
+            <form id="recover-form" class="animate-on-load">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                        <input type="email" id="email" class="form-control" placeholder="Seu email cadastrado" required>
+                    </div>
+                    <small class="form-text">Enviaremos um link para redefinir sua senha.</small>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Enviar Link de Recuperação <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="login-footer animate-on-load">
+                <a href="index.html">Voltar para o login</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Script específico para recuperação de senha
+        document.addEventListener('DOMContentLoaded', function() {
+            const recoverForm = document.getElementById('recover-form');
+            if (recoverForm) {
+                recoverForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = document.getElementById('email').value;
+                    
+                    // Validação simples
+                    if (!email || !validateEmail(email)) {
+                        document.getElementById('alert-container').innerHTML = `
+                            <div class="alert alert-danger">
+                                <p>Por favor, insira um email válido.</p>
+                            </div>
+                        `;
+                        document.getElementById('email').classList.add('is-invalid');
+                    } else {
+                        document.getElementById('email').classList.remove('is-invalid');
+                        document.getElementById('alert-container').innerHTML = `
+                            <div class="alert alert-success">
+                                <p>Email enviado com sucesso! Verifique sua caixa de entrada.</p>
+                            </div>
+                        `;
+                        
+                        // Desabilitar o formulário após envio
+                        recoverForm.querySelector('button').disabled = true;
+                        recoverForm.querySelector('button').innerHTML = 'Email Enviado <i class="fas fa-check"></i>';
+                        
+                        // Redirecionar após alguns segundos
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 3000);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

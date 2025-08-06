@@ -1,0 +1,56 @@
+@extends('adminlte::page')
+
+@section('title', 'Registro de análises presuntivas')
+
+@section('content_header')
+<h1>Cadastro de Análises Presuntivas</h1>
+
+<ol class="breadcrumb">
+    <li><a href="">Dashboard</a></li>
+    <li><a href="">Análises Presuntivas</a></li>
+    <li><a href="">Cadastro</a></li>
+</ol>
+@endsection
+
+@section('content')
+
+@include('admin.includes.alerts')
+
+<div class="box">
+    <div class="box-header"></div>
+    <div class="box-body">
+        @php
+            $data_analise  = !empty(session('data_analise'))  ? session('data_analise')  : old('data_analise');
+            $presuntiva_id = !empty(session('presuntiva_id')) ? session('presuntiva_id') : old('presuntiva_id');
+            $ciclo_id      = !empty(session('ciclo_id'))      ? session('ciclo_id')      : old('ciclo_id');
+        @endphp
+        <form action="{{ route('admin.presuntivas.to_store') }}" method="post" enctype="multipart/form-data">
+            {!! csrf_field() !!}
+            <div class="form-group">
+                <label for="ciclo_id">Ciclo:</label>
+                <select name="ciclo_id" class="form-control">
+                    <option value="">..:: Selecione ::..</option>
+                    @foreach($ciclos as $ciclo)
+                        <option value="{{ $ciclo->ciclo_id }}" {{ ($ciclo->ciclo_id == $ciclo_id) ? 'selected' : '' }}>{{ $ciclo->tanque_sigla }} ( Ciclo Nº {{ $ciclo->ciclo_numero }} )</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="data_analise">Data da análise:</label>
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <a onclick="clearDateValue(this);"><i class="fa fa-calendar"></i></a>
+                    </div>
+                    <input type="text" name="data_analise" placeholder="Data da análise" class="form-control pull-right" id="date_picker" value="{{ $data_analise }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save" aria-hidden="true"></i> Salvar</button>
+                <a href="{{ route('admin.presuntivas') }}" class="btn btn-success">
+                    <i class="fa fa-arrow-left" aria-hidden="true"></i> Voltar para listagem
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection

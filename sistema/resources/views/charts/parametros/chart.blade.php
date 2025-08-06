@@ -1,0 +1,3262 @@
+@extends('adminlte::page')
+@php
+    use App\Models\Tanques;
+    use App\Models\ColetasParametrosTipos;
+
+    $maxAxisY = 0;
+
+    $maxValue = null;
+    $minValue = null;
+    $formatMedia = null;
+
+   
+
+@endphp
+@section('title', 'Gráfico de parâmetros')
+
+@section('content_header')
+<head>
+<link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+<!-- <link rel="stylesheet" href="/sistema/public/css/styles.css"> -->
+</head>
+<h1>Gráfico de parâmetros</h1>
+
+<ol class="breadcrumb">
+    <li><a href="">Dashboard</a></li>
+    <li><a href="{{ route('admin.graficos_coletas_parametros') }}">Gráfico de parâmetros</a></li>
+</ol>
+@endsection
+
+@section('content')
+
+<style>
+  /**
+ * @description Lib de funcoes da aplicacao
+ * @author Pedro Aguiar <pedro.aguiar@camanor.com.br>
+ */
+
+.form-centralized-data input, 
+.form-centralized-data select {
+    text-align: center;
+    text-align-last: center;
+}
+.form-centralized-data input {
+    padding-left: 10%;
+    padding-right: 10%;
+}
+.form-centralized-data select {
+    padding-left: 15%;
+    padding-right: 15%;
+}
+
+/**
+ * [slidecontainer css classes]
+ * 
+ * Classes para os estilos do slide-bar (type="range") html
+ */
+.slidecontainer {
+    width: 100%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Full-width */
+    height: 15px; /* Specified height */
+    border-radius: 5px; /* Radius border */
+    background: #d3d3d3; /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */ 
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    border-radius: 50%; /* Radius border */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    border-radius: 50%; /* Radius border */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.login-page .login-box-body {
+    padding-top: 40px;
+    border-radius: 10px; 
+    box-shadow: 5px 10px 25px #6e99bb;
+}
+
+.flt_btn_scrollup {
+    width: 45px;
+    height: 40px;
+    opacity: 1;
+    position: fixed;
+    bottom: 50px;
+    right: 15px;
+    display: none;
+    border-radius: 5px;
+    text-align: center;
+    color: #fff;
+    font-size: 28px;
+    background: #e74b42;
+    z-index: 9999;
+    -webkit-transition: all ease 0.5s;
+    -moz-transition: all ease 0.5s;
+    transition: all ease 0.5s;
+}
+
+/* Values parameters */
+.param{
+    display: flex;
+    flex-direction: column;
+    row-gap: 13px;
+    padding: 9% 2%;
+    
+}
+
+.temp{
+    font-style: italic;
+    font-weight: bold;
+    color: rgb(23, 92, 97);
+    padding: 5px;
+    text-align: start;
+    border-radius: 5px;
+    border-style: none;
+    font-size: 16px;
+    transition: 0.5s;
+    margin: 2px auto -9px;
+}
+
+.temp:hover{
+    opacity: 0.8;
+    transform: translateY(-12px);
+}
+
+.water{
+    /* background-color: rgb(109, 255, 30); */
+    /* transform: translate(-50%, -50%); */
+    position: relative;
+    z-index: 400;
+    top: 48px;
+    /* border-radius: 10px; */
+    
+
+}
+
+/* .water:nth-child(1){
+    color: rgb(16, 136, 160);
+    /* animation: animate 4s ease-in-out infinite; 
+}
+
+.water:nth-child(2){
+    color: rgb(16, 136, 160);
+    animation: animate 4s ease-in-out infinite;
+} 
+
+/* .water:nth-child(3){
+    color: rgb(16, 136, 160);
+    animation: animate 4s ease-in-out infinite;
+} */
+
+.list {
+    margin:0; 
+    padding:0; 
+    list-style:none;
+}
+
+.list li {
+    padding-top: 15px;
+}
+
+.image-preview-input {
+    position: relative;
+	overflow: hidden;
+	margin: 0px;    
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;    
+}
+.image-preview-input input[type=file] {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin: 0;
+	padding: 0;
+	font-size: 20px;
+	cursor: pointer;
+	opacity: 0;
+	filter: alpha(opacity=0);
+}
+.image-preview-input-title {
+    margin-left:2px;
+}
+
+/* Absolute Center Spinner */
+.loading {
+    position: fixed;
+    z-index: 10000;
+    height: 10px;
+    width: 10px;
+    overflow: show;
+    margin: auto;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+/* Transparent Overlay */
+.loading:before {
+    content: '';
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0, .8));
+
+    background: -webkit-radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0,.8));
+}
+
+/* :not(:required) hides these rules from IE9 and below */
+.loading:not(:required) {
+    /* hide "loading..." text */
+    font: 0/0 a;
+    color: transparent;
+    text-shadow: none;
+    background-color: transparent;
+    border: 0;
+}
+
+.loading:not(:required):after {
+    content: '';
+    display: block;
+    font-size: 10px;
+    width: 1em;
+    height: 1em;
+    margin-top: -0.5em;
+    -webkit-animation: spinner 150ms infinite linear;
+    -moz-animation: spinner 150ms infinite linear;
+    -ms-animation: spinner 150ms infinite linear;
+    -o-animation: spinner 150ms infinite linear;
+    animation: spinner 150ms infinite linear;
+    border-radius: 0.5em;
+    -webkit-box-shadow: rgba(255,255,255, 0.75) 1.5em 0 0 0, rgba(255,255,255, 0.75) 1.1em 1.1em 0 0, rgba(255,255,255, 0.75) 0 1.5em 0 0, rgba(255,255,255, 0.75) -1.1em 1.1em 0 0, rgba(255,255,255, 0.75) -1.5em 0 0 0, rgba(255,255,255, 0.75) -1.1em -1.1em 0 0, rgba(255,255,255, 0.75) 0 -1.5em 0 0, rgba(255,255,255, 0.75) 1.1em -1.1em 0 0;
+    box-shadow: rgba(255,255,255, 0.75) 1.5em 0 0 0, rgba(255,255,255, 0.75) 1.1em 1.1em 0 0, rgba(255,255,255, 0.75) 0 1.5em 0 0, rgba(255,255,255, 0.75) -1.1em 1.1em 0 0, rgba(255,255,255, 0.75) -1.5em 0 0 0, rgba(255,255,255, 0.75) -1.1em -1.1em 0 0, rgba(255,255,255, 0.75) 0 -1.5em 0 0, rgba(255,255,255, 0.75) 1.1em -1.1em 0 0;
+}
+
+/* Animation */
+
+@-webkit-keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+@-moz-keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+@-o-keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+@keyframes spinner {
+    0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+
+    
+}
+
+@keyframes animate {
+	0%,
+	100% {
+		clip-path: polygon(
+			0% 45%,
+			16% 44%,
+			33% 50%,
+			54% 60%,
+			70% 61%,
+			84% 59%,
+			100% 52%,
+			100% 100%,
+			0% 100%
+		);
+	}
+
+	50% {
+		clip-path: polygon(
+			0% 60%,
+			15% 65%,
+			34% 66%,
+			51% 62%,
+			67% 50%,
+			84% 45%,
+			100% 46%,
+			100% 100%,
+			0% 100%
+		);
+	}
+} 
+
+
+/* Elementos referentes a animação*/
+.draw-container {
+    position: relative;
+    top: 86px;
+    width: 270px;
+    height: 222px;
+    background: linear-gradient(to bottom, #96C7CC 0%, #C3DDD8 30%, #C3DDD8 100%);
+    border-radius: 20px;
+    overflow: hidden;
+    padding: 0;
+  }
+  
+  .gradientContainer {
+    margin-top: 59px;
+    height: 300px;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #C3E5E5, #0D3F53);
+    position: absolute;
+    left: 0;
+    z-index: 200;
+  }
+  
+  .overlay {
+    width: 100%;
+    height: 240px;
+    position: absolute;
+  }
+  .overlay.one {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 10%, #0B4558 100%);
+    z-index: 100;
+  }
+  
+  .gradient {
+    margin-top: -100px;
+    width: 620px;
+    height: 400px;
+    transform: translateX(-50px) rotate(20deg);
+    -webkit-animation-name: gradient;
+            animation-name: gradient;
+    -webkit-animation-duration: 10s;
+            animation-duration: 10s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-fill-mode: forwards;
+            animation-fill-mode: forwards;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform-style: preserve-3d;
+  }
+  
+  @-webkit-keyframes gradient {
+    0% {
+      transform: translateX(-50px) rotate(20deg);
+    }
+    100% {
+      transform: translateX(-379px) rotate(20deg);
+    }
+  }
+  
+  @keyframes gradient {
+    0% {
+      transform: translateX(-50px) rotate(20deg);
+    }
+    100% {
+      transform: translateX(-379px) rotate(20deg);
+    }
+  }
+  .ray1 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray2 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 3s;
+            animation-duration: 3s;
+    -webkit-animation-delay: 4s;
+            animation-delay: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray3 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray4 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray5 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 1s;
+            animation-duration: 1s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray6 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 1s;
+            animation-duration: 1s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray7 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray8 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 1s;
+            animation-duration: 1s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray9 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 3s;
+            animation-duration: 3s;
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray10 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 1s;
+            animation-duration: 1s;
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray11 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 1s;
+            animation-duration: 1s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray12 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 4s;
+            animation-delay: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray13 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray14 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray15 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray16 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray17 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray18 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 4s;
+            animation-delay: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray19 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray20 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 3s;
+            animation-duration: 3s;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray21 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray22 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray23 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray24 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 1s;
+            animation-duration: 1s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray25 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  .ray26 {
+    height: 400px;
+    display: inline-block;
+    -webkit-animation-name: blinkRay;
+            animation-name: blinkRay;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    opacity: 1;
+  }
+  
+  @-webkit-keyframes blinkRay {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.4;
+    }
+  }
+  
+  @keyframes blinkRay {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.4;
+    }
+  }
+  .ray1, .ray14, .ray27 {
+    width: 20px;
+    background: linear-gradient(to bottom, #AFE0E4 0%, #AFE0E4 40%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray2, .ray15, .ray28 {
+    width: 20px;
+    background: linear-gradient(to bottom, #C0E6E9 0%, #C0E6E9 30%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray3, .ray16, .ray29 {
+    width: 15px;
+    background: linear-gradient(to bottom, #84CDD4 0%, #84CDD4 20%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray4, .ray17, .ray30 {
+    width: 5px;
+    background: linear-gradient(to bottom, #7EC9D1 0%, #7EC9D1 10%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray5, .ray18, .ray31 {
+    width: 10px;
+    background: linear-gradient(to bottom, #97D6DC 0%, #97D6DC 40%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray6, .ray19, .ray32 {
+    width: 10px;
+    background: linear-gradient(to bottom, #AEDEE2 0%, #AEDEE2 30%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray7, .ray20, .ray33 {
+    width: 10px;
+    background: linear-gradient(to bottom, #96D3D8 0%, #96D3D8 20%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray8, .ray21, .ray34 {
+    width: 5px;
+    background: linear-gradient(to bottom, #9CD7DD 0%, #9CD7DD 40%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray9, .ray22, .ray35 {
+    width: 25px;
+    background: linear-gradient(to bottom, #7ECBD3 0%, #7ECBD3 60%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray10, .ray23, .ray36 {
+    width: 10px;
+    background: linear-gradient(to bottom, #97D6DC 0%, #97D6DC 50%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray11, .ray24, .ray37 {
+    width: 10px;
+    background: linear-gradient(to bottom, #AEDEE2 0%, #AEDEE2 40%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray12, .ray25, .ray38 {
+    width: 10px;
+    background: linear-gradient(to bottom, #96D3D8 0%, #96D3D8 20%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .ray13, .ray26, .ray39 {
+    width: 5px;
+    background: linear-gradient(to bottom, #9CD7DD 0%, #9CD7DD 10%, rgba(255, 255, 255, 0) 100%);
+  }
+  
+  .cPos {
+    position: relative;
+    top: 30%;
+    left: calc(50% - 80px);
+    z-index: 9;
+    transform: translateY(0) scale(1);
+    -webkit-animation-name: sunset;
+            animation-name: sunset;
+    -webkit-animation-duration: 10s;
+            animation-duration: 10s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  @-webkit-keyframes sunset {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      transform: translateY(10px) scale(0.9);
+    }
+  }
+  
+  @keyframes sunset {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      transform: translateY(10px) scale(0.9);
+    }
+  }
+  .cc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .circle {
+    position: absolute;
+    background: #FBFEF9;
+    border-radius: 50%;
+  }
+  .circle.one {
+    width: 160px;
+    height: 160px;
+    opacity: 0.2;
+  }
+  .circle.two {
+    width: 130px;
+    height: 130px;
+    opacity: 0.2;
+  }
+  .circle.three {
+    width: 100px;
+    height: 100px;
+    opacity: 0.2;
+  }
+  .circle.four {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .rocks {
+    position: relative;
+    z-index: 2000;
+  }
+  .rocks .rock {
+    position: absolute;
+  }
+  .rocks .rock.one {
+    top: 175px;
+    left: -30px;
+    width: 98px;
+    height: 50px;
+    -webkit-clip-path: polygon(0 0, 56% 10%, 80% 100%, 0% 100%);
+            clip-path: polygon(0 0, 56% 10%, 80% 100%, 0% 100%);
+    background: #02364B;
+    z-index: 2000;
+  }
+  .rocks .rock.two {
+    top: 190px;
+    left: 30px;
+    width: 95px;
+    height: 60px;
+    -webkit-clip-path: polygon(0 15%, 20% 10%, 100% 70%, 100% 100%, 0% 100%);
+            clip-path: polygon(0 15%, 20% 10%, 100% 70%, 100% 100%, 0% 100%);
+    background: #063B51;
+    z-index: 1000;
+  }
+  .rocks .rock.three {
+    top: 194px;
+    left: 50px;
+    width: 95px;
+    height: 60px;
+    -webkit-clip-path: polygon(0 60%, 60% 20%, 100% 12%, 100% 100%, 0 100%);
+            clip-path: polygon(0 60%, 60% 20%, 100% 12%, 100% 100%, 0 100%);
+    background: #002C44;
+    z-index: 3000;
+  }
+  .rocks .rock.four {
+    top: 217px;
+    left: 125px;
+    width: 60px;
+    height: 65px;
+    -webkit-clip-path: polygon(0 100%, 20% 45%, 100% 12%, 100% 100%, 0 100%);
+            clip-path: polygon(0 100%, 20% 45%, 100% 12%, 100% 100%, 0 100%);
+    background: #023A51;
+    z-index: 4000;
+  }
+  
+  .bubbleContainer {
+    width: 100%;
+    height: 100px;
+    bottom: 0;
+    position: absolute;
+    -webkit-animation-name: bubblesIn;
+            animation-name: bubblesIn;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-iteration-count: 1;
+            animation-iteration-count: 1;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  @-webkit-keyframes bubblesIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes bubblesIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  .bubbleX1 {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX1;
+            animation-name: bubbleX1;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY1 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 29px;
+    left: 43px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s;
+  }
+  
+  @-webkit-keyframes bubbleX1 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(4px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(2px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX1 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(4px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(2px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @-webkit-keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX2 {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX2;
+            animation-name: bubbleX2;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY2 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 82px;
+    left: 83px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+  }
+  
+  @-webkit-keyframes bubbleX2 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(1px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(13px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX2 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(1px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(13px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX3 {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX3;
+            animation-name: bubbleX3;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY3 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 68px;
+    left: 118px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+  }
+  
+  @-webkit-keyframes bubbleX3 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(2px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(4px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX3 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(2px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(4px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX4 {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX4;
+            animation-name: bubbleX4;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY4 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 64px;
+    left: 114px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+  }
+  
+  @-webkit-keyframes bubbleX4 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(4px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(7px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX4 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(4px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(7px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX5 {
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX5;
+            animation-name: bubbleX5;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY5 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 56px;
+    left: 112px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+  }
+  
+  @-webkit-keyframes bubbleX5 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(15px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(11px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX5 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(15px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(11px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX6 {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX6;
+            animation-name: bubbleX6;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY6 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 79px;
+    left: 137px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+  }
+  
+  @-webkit-keyframes bubbleX6 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(13px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(15px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX6 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(13px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(15px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX7 {
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX7;
+            animation-name: bubbleX7;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY7 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 65px;
+    left: 131px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+  }
+  
+  @-webkit-keyframes bubbleX7 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(15px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(15px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX7 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(15px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(15px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX8 {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX8;
+            animation-name: bubbleX8;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY8 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 80px;
+    left: 15px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+  }
+  
+  @-webkit-keyframes bubbleX8 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(13px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(6px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX8 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(13px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(6px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX9 {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX9;
+            animation-name: bubbleX9;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY9 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 77px;
+    left: 55px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+  }
+  
+  @-webkit-keyframes bubbleX9 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(9px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(12px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX9 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(9px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(12px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .bubbleX10 {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #FFF;
+    transform: translateX(0);
+    -webkit-animation-name: bubbleX10;
+            animation-name: bubbleX10;
+    -webkit-animation-duration: 4s;
+            animation-duration: 4s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .bubbleY10 {
+    display: inline-block;
+    position: absolute;
+    z-index: 5000;
+    top: 11px;
+    left: 91px;
+    -webkit-animation-name: bubbleY;
+            animation-name: bubbleY;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+    transform: translateY(0);
+    opacity: 0.6;
+    -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+  }
+  
+  @-webkit-keyframes bubbleX10 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(9px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(10px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  
+  @keyframes bubbleX10 {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-random(15)px);
+    }
+    40% {
+      transform: translateX(9px);
+    }
+    60% {
+      transform: translateX(-random(15)px);
+    }
+    80% {
+      transform: translateX(10px);
+    }
+    100% {
+      transform: translateX(-random(15)px);
+    }
+  }
+  @keyframes bubbleY {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+    100% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+  }
+  .triangleContainer {
+    margin-top: 57px;
+    width: 1000px;
+    position: absolute;
+    z-index: 1000;
+    transform: translateX(-250px);
+    -webkit-animation-name: triangles;
+            animation-name: triangles;
+    -webkit-animation-duration: 5s;
+            animation-duration: 5s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  .triangleBar {
+    width: 1000px;
+    height: 6px;
+    position: absolute;
+    z-index: 1500;
+    background: linear-gradient(to bottom, #E7F9F3, #F5FFF9);
+  }
+  
+  .triangle {
+    width: 50px;
+    height: 10px;
+    display: inline-block;
+    background: #EDF7E7;
+    -webkit-clip-path: polygon(0% 0%, 100% 0%, 50% 100%, 0% 0%);
+            clip-path: polygon(0% 0%, 100% 0%, 50% 100%, 0% 0%);
+  }
+  
+  @-webkit-keyframes triangles {
+    0% {
+      transform: translateX(-250px);
+    }
+    100% {
+      transform: translateX(-500px);
+    }
+  }
+  
+  @keyframes triangles {
+    0% {
+      transform: translateX(-250px);
+    }
+    100% {
+      transform: translateX(-500px);
+    }
+  }
+  
+  @-webkit-keyframes whaleTranslate {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(380px);
+    }
+  }
+  
+  @keyframes whaleTranslate {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(380px);
+    }
+  }
+  .whalePos {
+    position: absolute;
+    z-index: 1000;
+  }
+  .whalePos.size1 {
+    top: 150px;
+    left: -210px;
+  }
+  .whalePos.size2 {
+    top: 100px;
+    left: -280px;
+  }
+  .whalePos.size3 {
+    top: 120px;
+    left: -140px;
+  }
+  .whalePos.size4 {
+    top: 190px;
+    left: -310px;
+  }
+  
+  .whaleRotate {
+    position: relative;
+    width: 245px;
+    height: 110px;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+  }
+  .whaleRotate.size1 {
+    transform: rotate(0) scale(0.35);
+    -webkit-animation-name: whaleMovementXLarge;
+            animation-name: whaleMovementXLarge;
+  }
+  .whaleRotate.size2 {
+    transform: rotate(0) scale(0.25);
+    -webkit-animation-name: whaleMovementLarge;
+            animation-name: whaleMovementLarge;
+  }
+  .whaleRotate.size3 {
+    transform: rotate(0) scale(0.15);
+    -webkit-animation-name: whaleMovementMedium;
+            animation-name: whaleMovementMedium;
+  }
+  .whaleRotate.size4 {
+    transform: rotate(0) scale(0.1);
+    -webkit-animation-name: whaleMovementSmall;
+            animation-name: whaleMovementSmall;
+  }
+  
+  @-webkit-keyframes whaleMovementXLarge {
+    0% {
+      transform: rotate(0) scale(0.35);
+    }
+    100% {
+      transform: rotate(10deg) scale(0.35);
+    }
+  }
+  
+  @keyframes whaleMovementXLarge {
+    0% {
+      transform: rotate(0) scale(0.35);
+    }
+    100% {
+      transform: rotate(10deg) scale(0.35);
+    }
+  }
+  @-webkit-keyframes whaleMovementLarge {
+    0% {
+      transform: rotate(0) scale(0.25);
+    }
+    100% {
+      transform: rotate(10deg) scale(0.25);
+    }
+  }
+  @keyframes whaleMovementLarge {
+    0% {
+      transform: rotate(0) scale(0.25);
+    }
+    100% {
+      transform: rotate(10deg) scale(0.25);
+    }
+  }
+  @-webkit-keyframes whaleMovementMedium {
+    0% {
+      transform: rotate(0) scale(0.15);
+    }
+    100% {
+      transform: rotate(10deg) scale(0.15);
+    }
+  }
+  @keyframes whaleMovementMedium {
+    0% {
+      transform: rotate(0) scale(0.15);
+    }
+    100% {
+      transform: rotate(10deg) scale(0.15);
+    }
+  }
+  @-webkit-keyframes whaleMovementSmall {
+    0% {
+      transform: rotate(0) scale(0.1);
+    }
+    100% {
+      transform: rotate(10deg) scale(0.1);
+    }
+  }
+  @keyframes whaleMovementSmall {
+    0% {
+      transform: rotate(0) scale(0.1);
+    }
+    100% {
+      transform: rotate(10deg) scale(0.1);
+    }
+  }
+  .whale {
+    position: absolute;
+    width: inherit;
+    height: inherit;
+    background: radial-gradient(at 40% 20%, #95d6df 0%, #95d6df 35%, #6db3c2 35%, #6db3c2 60%, #6db3c2 70%, #407a8b 70%, #407a8b 100%);
+    -webkit-clip-path: polygon(15% 0%, 18.5% 20%, 19% 37%, 27% 46.5%, 33% 46.5%, 42.5% 37%, 43% 26.5%, 50.5% 28.5%, 65.5% 17%, 88.5% 12.5%, 97.5% 22.5%, 100% 49.5%, 97% 65.5%, 89.5% 81.5%, 64.5% 86.5%, 43.5% 80%, 23% 59.5%, 15.5% 41.5%, 8% 40%, 1.5% 28.5%, 6.5% 25%, 12.5% 26.5%, 12% 14%);
+            clip-path: polygon(15% 0%, 18.5% 20%, 19% 37%, 27% 46.5%, 33% 46.5%, 42.5% 37%, 43% 26.5%, 50.5% 28.5%, 65.5% 17%, 88.5% 12.5%, 97.5% 22.5%, 100% 49.5%, 97% 65.5%, 89.5% 81.5%, 64.5% 86.5%, 43.5% 80%, 23% 59.5%, 15.5% 41.5%, 8% 40%, 1.5% 28.5%, 6.5% 25%, 12.5% 26.5%, 12% 14%);
+  }
+  
+  .fin {
+    position: absolute;
+    top: 75%;
+    left: 50%;
+    z-index: 5000;
+    width: 50px;
+    height: 30px;
+    background: #407A8B;
+    transform-origin: center top;
+    -webkit-clip-path: polygon(30% 50%, 60% 0, 100% 0%, 80% 60%, 60% 80%, 0 100%);
+            clip-path: polygon(30% 50%, 60% 0, 100% 0%, 80% 60%, 60% 80%, 0 100%);
+    -webkit-animation-name: fin;
+            animation-name: fin;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+            animation-direction: alternate;
+    -webkit-animation-timing-function: linear;
+            animation-timing-function: linear;
+  }
+  
+  @-webkit-keyframes fin {
+    0% {
+      transform: rotate3d(0, 0, 0, 0deg);
+    }
+    100% {
+      transform: rotate3d(1, 1, 1, 30deg);
+    }
+  }
+  
+  @keyframes fin {
+    0% {
+      transform: rotate3d(0, 0, 0, 0deg);
+    }
+    100% {
+      transform: rotate3d(1, 1, 1, 30deg);
+    }
+  }
+  /* html, body {
+    overflow: hidden;
+  }
+  
+  body {
+    background: #E6FFFF;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  } */
+/* ################################################################################################################################### */
+</style>
+
+<div class="box">
+    <div class="box-header"></div>
+    <div class="box-body">
+        @forelse ($graficos as $tanque_id => $grafico)
+        <div class="row">
+            <div class="col-md-2"></div>
+       
+            
+
+            <div class="col-md-7">
+                @php
+                    $sigla = $tanques->where('id', $tanque_id)->first()->sigla;
+
+                    $maxAxisY = 0; 
+
+                    //$maxValue = null;
+                    //$minValue = null;
+                    //$formatMedia = null;
+
+
+
+                    $labels = [];
+                    $datasets = [];
+
+                    foreach ($grafico as $parametro_id => $parametros) {
+
+                        $parametro = ColetasParametrosTipos::find($parametro_id);
+
+                        $dataset = [
+                            'label'           => "{$parametro->descricao} ({$parametro->unidade_medida->sigla})",
+                            'backgroundColor' => $parametro->cor,
+                            'borderColor'     => $parametro->cor,
+                            'borderWidth'     => 2,
+                            'fill'            => false,
+                        ];
+
+                        $data = [];
+                        $data_values = [];
+                        
+                       
+
+                        foreach ($parametros as $amostraDataMedicao => $amostra) {
+
+                            $labels[$amostraDataMedicao] = $amostra->data_coleta();
+
+                            $data[$amostraDataMedicao] = $amostra->valor();
+
+                            $data_values[] = $amostra->valor(); 
+
+                            $maxAxisY = ($amostra->valor > $maxAxisY) ? ($amostra->valor() * 1.2) : $maxAxisY;
+
+                        }
+                   
+                       
+
+                        foreach ($labels as $key => $label) {
+                            $dataset['data'][] = isset($data[$key]) ? $data[$key] : null;
+                        }
+
+                        $datasets[] = $dataset;
+
+
+                            $maxValue = max($data);
+                            $minValue = min($data);
+                 
+			    $total = 0;
+			    foreach($data_values as $key => $value){
+			    	if($value != 0){
+			           $total++;
+			      }
+			    }
+			
+                            $sumA = array_sum($data_values);
+                            if($sumA == 0){
+                              $media = 0;
+                            }else{
+                              $media = $sumA / $total;
+                            }
+                            $formatMedia = number_format($media, 2, '.', ',');
+                            
+
+                        //$tempTM  = $maxValue    == null ? 'Parametro não selecionado' : $maxValue;
+                        //$tempTm  = $minValue    == null ? 'Parametro não selecionado' : $minValue;
+                        //$tempBio = $formatMedia == null ? 'Parametro não selecionado' : $formatMedia;
+
+                    }
+                   
+                @endphp
+            
+                <script>
+                $(document).ready(function() {
+                    var ctx = document.getElementById('chart_{{ $tanque_id }}');
+                    var chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: [
+                                @foreach ($labels as $label)
+                                    '{{ $label }}',
+                                @endforeach
+                            ],
+                            datasets: [
+                                @foreach ($datasets as $dataset)
+                                    {!! json_encode($dataset, JSON_UNESCAPED_UNICODE) !!},
+                                @endforeach
+                            ]
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'Tanque {{ $sigla }}'
+                            },
+                            plugins: {
+                                datalabels: {
+                                    anchor: 'end',
+                                    align: 'top'
+                                }
+                            },
+                            layout: {
+                                padding: {
+                                    left: 12,
+                                    right: 12
+                                }
+                            },
+                            scales: {
+                                xAxes: [{
+                                    ticks: {
+                                        autoSkip: false,
+                                        maxRotation: 45,
+                                        minRotation: 45
+                                    }
+                                }],
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true,
+                                        max: {{ $maxAxisY }}
+                                    }
+                                }]
+                            },
+                            aspectRatio: 1.8
+                        }
+                    });
+                });
+                </script>
+                <canvas id="chart_{{ $tanque_id }}"></canvas>
+            </div>
+    
+           @if($parametro_id == 1)
+           <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Oxigênio(O2): {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínimo: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máximo: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+           @endif
+
+           @if($parametro_id == 2)
+           <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Bioflocos: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínimo: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máximo: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+           @endif
+
+           @if($parametro_id == 3)
+           <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Salinidade: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínimo: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máximo: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+           @endif
+            
+            @if($parametro_id == 4)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Amônia: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínimo: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máximo: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+             
+            @if($parametro_id == 8)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Temperatura média: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+            
+            @if($parametro_id == 9)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Alcalinidade média: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 10)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Potássio: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 11)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Nitrito: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 12)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média dureza Cálcica: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 13)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Nitrato: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 14)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Cálcio: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 15)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Fósforo: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 16)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Silica: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 17)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Magnésio: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+            
+            @if($parametro_id == 18)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Sacarose positiva: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 19)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Sacarose negativa: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 20)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Sacarose variação: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 24)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Oxirredução: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+            @if($parametro_id == 26)
+            <div class="col-md-3 draw-container">
+            <div class="cPos">
+                <div class="cc">
+                    <div class="circle one"></div>
+                    <div class="circle two"></div>
+                    <div class="circle three"></div>
+                    <div class="circle four"></div>
+                </div>
+            </div>
+            <div class="triangleContainer">
+            <div class="triangleBar"></div><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span><span class="triangle"></span>
+            </div>
+            <div class="gradientContainer">
+                <div class="overlay one"></div>
+                <div class="gradient"><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span><span class="ray1"></span><span class="ray2"></span><span class="ray3"></span><span class="ray4"></span><span class="ray5"></span><span class="ray6"></span><span class="ray7"></span><span class="ray8"></span><span class="ray9"></span><span class="ray10"></span><span class="ray11"></span><span class="ray12"></span><span class="ray13"></span><span class="ray14"></span><span class="ray15"></span><span class="ray16"></span><span class="ray17"></span><span class="ray18"></span><span class="ray19"></span><span class="ray20"></span><span class="ray21"></span><span class="ray22"></span><span class="ray23"></span><span class="ray24"></span><span class="ray25"></span><span class="ray26"></span><span class="ray27"></span><span class="ray28"></span><span class="ray29"></span><span class="ray30"></span><span class="ray31"></span><span class="ray32"></span><span class="ray33"></span><span class="ray34"></span><span class="ray35"></span><span class="ray36"></span><span class="ray37"></span><span class="ray38"></span>
+            </div>
+            </div>
+            <div class="rocks">
+                <div class="rock one"></div>
+                <div class="rock two"></div>
+                <div class="rock three"></div>
+                <div class="rock four"></div>
+            </div>
+            <div class="bubbleContainer"><span class="bubbleY1"><span class="bubbleX1"></span></span><span class="bubbleY2"><span class="bubbleX2"></span></span><span class="bubbleY3"><span class="bubbleX3"></span></span><span class="bubbleY4"><span class="bubbleX4"></span></span><span class="bubbleY5"><span class="bubbleX5"></span></span><span class="bubbleY6"><span class="bubbleX6"></span></span><span class="bubbleY7"><span class="bubbleX7"></span></span><span class="bubbleY8"><span class="bubbleX8"></span></span><span class="bubbleY9"><span class="bubbleX9"></span></span><span class="bubbleY10"><span class="bubbleX10"></span></span><span class="bubbleY11"><span class="bubbleX11"></span></span><span class="bubbleY12"><span class="bubbleX12"></span></span><span class="bubbleY13"><span class="bubbleX13"></span></span><span class="bubbleY14"><span class="bubbleX14"></span></span><span class="bubbleY15"><span class="bubbleX15"></span></span><span class="bubbleY16"><span class="bubbleX16"></span></span><span class="bubbleY17"><span class="bubbleX17"></span></span><span class="bubbleY18"><span class="bubbleX18"></span></span><span class="bubbleY19"><span class="bubbleX19"></span></span><span class="bubbleY20"><span class="bubbleX20"></span></span><span class="bubbleY21"><span class="bubbleX21"></span></span><span class="bubbleY22"><span class="bubbleX22"></span></span><span class="bubbleY23"><span class="bubbleX23"></span></span><span class="bubbleY24"><span class="bubbleX24"></span></span><span class="bubbleY25"><span class="bubbleX25"></span></span><span class="bubbleY26"><span class="bubbleX26"></span></span><span class="bubbleY27"><span class="bubbleX27"></span></span><span class="bubbleY28"><span class="bubbleX28"></span></span><span class="bubbleY29"><span class="bubbleX29"></span></span><span class="bubbleY30"><span class="bubbleX30"></span></span><span class="bubbleY31"><span class="bubbleX31"></span></span><span class="bubbleY32"><span class="bubbleX32"></span></span><span class="bubbleY33"><span class="bubbleX33"></span></span><span class="bubbleY34"><span class="bubbleX34"></span></span><span class="bubbleY35"><span class="bubbleX35"></span></span><span class="bubbleY36"><span class="bubbleX36"></span></span><span class="bubbleY37"><span class="bubbleX37"></span></span><span class="bubbleY38"><span class="bubbleX38"></span></span><span class="bubbleY39"><span class="bubbleX39"></span></span><span class="bubbleY40"><span class="bubbleX40"></span></span><span class="bubbleY41"><span class="bubbleX41"></span></span><span class="bubbleY42"><span class="bubbleX42"></span></span><span class="bubbleY43"><span class="bubbleX43"></span></span><span class="bubbleY44"><span class="bubbleX44"></span></span><span class="bubbleY45"><span class="bubbleX45"></span></span><span class="bubbleY46"><span class="bubbleX46"></span></span><span class="bubbleY47"><span class="bubbleX47"></span></span><span class="bubbleY48"><span class="bubbleX48"></span></span><span class="bubbleY49"><span class="bubbleX49"></span></span>
+            </div>
+            <div class="param">
+            <div class="water">
+            <i class="fa-solid "></i>
+              <h5 class="temp">Média Sulfeto: {{$formatMedia}}</h5>
+            </div>
+            <div class="water">
+            <i class="fa-solid fa-temperature-low"></i>
+              <h5 class="temp">Mínima: {{$minValue}}</h5>
+            </div>
+            <div class="water">  
+            <i class="fa-solid fa-temperature-high"></i>
+              <h5 class="temp">Máxima: {{$maxValue}}</h5>
+            </div> 
+            </div>     
+           </div>
+            @endif
+
+        </div>
+        @empty
+        <div class="bg-gray color-palette alert text-center">
+            <i>Não existem dados para gerar os gráficos solicitados.</i>
+        </div>
+        @endforelse
+    </div>
+</div>
+@endsection 

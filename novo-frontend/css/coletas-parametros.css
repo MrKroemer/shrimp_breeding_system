@@ -1,0 +1,45 @@
+/* Estilos específicos para Coleta de Parâmetros */
+.table-section {
+    margin-top: 2rem;
+}
+#coletas-table th, #coletas-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+#coleta-form-section.modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+#coleta-form-section.hidden {
+    display: none;
+}
+#coleta-form {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    min-width: 320px;
+    max-width: 100vw;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+}
+#coleta-form label {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.2rem;
+}
+#coleta-form input, #coleta-form select {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+#coleta-form .form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}

@@ -1,0 +1,618 @@
+/* Estilos para os botões de parâmetros de qualidade de água */
+
+.water-quality-container {
+  margin: 20px 0 30px;
+  padding: 10px 0;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.water-quality-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.water-param-btn {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  min-width: 200px;
+  flex: 1;
+  min-height: 80px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.water-param-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.water-param-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.resume-cards{
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.resume-cards:hover{
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.param-icon {
+  background: rgba(0, 86, 179, 0.1);
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.param-icon i {
+  font-size: 20px;
+  color: #0056b3;
+}
+
+.param-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.param-name {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.param-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.param-status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+
+.param-status.good {
+  background-color: #28a745;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.param-status.warning {
+  background-color: #ffc107;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.param-status.danger {
+  background-color: #dc3545;
+  box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+}
+
+/* Estilos específicos para cada parâmetro */
+.oxygen-btn .param-icon {
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.oxygen-btn .param-icon i {
+  color: #28a745;
+}
+
+.ph-btn .param-icon {
+  background: rgba(111, 66, 193, 0.1);
+}
+
+.ph-btn .param-icon i {
+  color: #6f42c1;
+}
+
+.temperature-btn .param-icon {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.temperature-btn .param-icon i {
+  color: #dc3545;
+}
+
+.salinity-btn .param-icon {
+  background: rgba(23, 162, 184, 0.1);
+}
+
+.salinity-btn .param-icon i {
+  color: #17a2b8;
+}
+
+.ammonia-btn .param-icon {
+  background: rgba(255, 193, 7, 0.1);
+}
+
+.ammonia-btn .param-icon i {
+  color: #ffc107;
+}
+
+.nitrite-btn .param-icon {
+  background: rgba(253, 126, 20, 0.1);
+}
+
+.nitrite-btn .param-icon i {
+  color: #fd7e14;
+}
+
+/* Animações */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(0, 86, 179, 0.2);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.oxygen-btn.animate-pulse {
+  animation-delay: 0s;
+}
+
+.ph-btn.animate-pulse {
+  animation-delay: 0.3s;
+}
+
+.temperature-btn.animate-pulse {
+  animation-delay: 0.6s;
+}
+
+.salinity-btn.animate-pulse {
+  animation-delay: 0.9s;
+}
+
+.ammonia-btn.animate-pulse {
+  animation-delay: 1.2s;
+}
+
+.nitrite-btn.animate-pulse {
+  animation-delay: 1.5s;
+}
+
+/* Efeito de hover com gradiente */
+.water-param-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.water-param-btn:hover::before {
+  opacity: 1;
+}
+
+/* Estilos para o modal de detalhes */
+.param-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.param-modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.3s ease forwards;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.param-modal-header {
+  padding: 25px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  background-color: #0056b3;
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Removendo o pseudo-elemento anterior */
+
+/* Cores específicas para cada parâmetro */
+.modal-oxygen .param-modal-header {
+  background-color: #28a745;
+}
+
+.modal-ph .param-modal-header {
+  background-color: #6f42c1;
+}
+
+.modal-temperature .param-modal-header {
+  background-color: #dc3545;
+}
+
+.modal-salinity .param-modal-header {
+  background-color: #17a2b8;
+}
+
+.modal-ammonia .param-modal-header {
+  background-color: #ffc107;
+  color: #333; /* Texto escuro para fundo claro */
+}
+
+.modal-ammonia .param-detail-value,
+.modal-ammonia .param-detail-status,
+.modal-ammonia .param-modal-close {
+  color: #333;
+}
+
+.modal-ammonia .status-good,
+.modal-ammonia .status-warning,
+.modal-ammonia .status-critical {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.modal-nitrite .param-modal-header {
+  background-color: #fd7e14;
+}
+
+.param-detail-header {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.param-detail-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.param-detail-header.status-good {
+  background-color: #28a745;
+}
+
+.param-detail-header.status-warning {
+  background-color: #ffc107;
+}
+
+.param-detail-header.status-danger {
+  background-color: #dc3545;
+}
+
+.param-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.param-modal-close:hover {
+  color: #fff;
+}
+
+.param-modal-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+  background-color: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.param-modal-header h2 {
+  margin: 0 0 15px 0;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.param-detail-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 5px;
+}
+
+.param-detail-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.status-good {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.status-warning {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.status-critical {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.param-detail-body {
+  padding: 25px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+}
+
+.param-detail-chart {
+  width: 100%;
+  height: 300px;
+  margin-bottom: 20px;
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  padding: 15px;
+}
+
+.param-detail-info {
+  flex: 1 1 300px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.param-detail-info h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #0056b3;
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+.param-detail-info p {
+  margin: 12px 0;
+  color: #555;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.param-detail-actions {
+  flex: 1 1 100%;
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.close-modal {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.close-modal:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.param-detail-body {
+  padding: 20px;
+}
+
+.param-detail-value {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.current-value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.param-detail-status {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.status-good {
+  color: #28a745;
+}
+
+.status-warning {
+  color: #ffc107;
+}
+
+.status-danger {
+  color: #dc3545;
+}
+
+.param-detail-chart {
+  margin-bottom: 20px;
+  height: 200px;
+}
+
+.param-detail-info {
+  margin-bottom: 20px;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.param-detail-info h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.param-detail-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.param-detail-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #0056b3;
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #004494;
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  color: #0056b3;
+  border: 1px solid #0056b3;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0056b3;
+  color: #fff;
+}
+
+/* Animação de atualização de parâmetro */
+@keyframes paramUpdate {
+  0% {
+    background-color: rgba(40, 167, 69, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.param-updated {
+  animation: paramUpdate 1s ease;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+  .water-quality-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .water-param-btn {
+    flex: 0 0 calc(50% - 10px);
+    min-width: unset;
+  }
+  
+  .param-detail-content {
+    width: 95%;
+  }
+  
+  .param-detail-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 576px) {
+  .water-param-btn {
+    flex: 0 0 100%;
+  }
+  
+  .current-value {
+    font-size: 2.5rem;
+  }
+}

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Parâmetros de Água</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/water-params.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste de Parâmetros de Qualidade de Água</h1>
+        
+        <!-- Botões de Parâmetros -->
+        <div class="water-quality-container">
+            <div class="water-quality-buttons">
+                <button class="water-param-btn oxygen-btn animate-pulse">
+                    <div class="param-icon">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                    <div class="param-info">
+                        <span class="param-name">Oxigênio</span>
+                        <span class="param-value">5.8 mg/L</span>
+                    </div>
+                    <div class="param-status good"></div>
+                </button>
+                
+                <button class="water-param-btn ph-btn animate-pulse">
+                    <div class="param-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="param-info">
+                        <span class="param-name">pH</span>
+                        <span class="param-value">7.2</span>
+                    </div>
+                    <div class="param-status good"></div>
+                </button>
+                
+                <button class="water-param-btn temperature-btn animate-pulse">
+                    <div class="param-icon">
+                        <i class="fas fa-temperature-high"></i>
+                    </div>
+                    <div class="param-info">
+                        <span class="param-name">Temperatura</span>
+                        <span class="param-value">28.5 °C</span>
+                    </div>
+                    <div class="param-status good"></div>
+                </button>
+                
+                <button class="water-param-btn salinity-btn animate-pulse">
+                    <div class="param-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="param-info">
+                        <span class="param-name">Salinidade</span>
+                        <span class="param-value">12 ppt</span>
+                    </div>
+                    <div class="param-status warning"></div>
+                </button>
+                
+                <button class="water-param-btn ammonia-btn animate-pulse">
+                    <div class="param-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <div class="param-info">
+                        <span class="param-name">Amônia</span>
+                        <span class="param-value">0.05 mg/L</span>
+                    </div>
+                    <div class="param-status good"></div>
+                </button>
+                
+                <button class="water-param-btn nitrite-btn animate-pulse">
+                    <div class="param-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <div class="param-info">
+                        <span class="param-name">Nitrito</span>
+                        <span class="param-value">0.01 mg/L</span>
+                    </div>
+                    <div class="param-status good"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Detalhes do Parâmetro -->
+    <div id="param-detail-modal" class="param-modal">
+        <div class="param-modal-content">
+            <span class="param-modal-close">&times;</span>
+            <div class="param-modal-header">
+                <h2 id="param-detail-title">Oxigênio</h2>
+                <div id="param-detail-value" class="param-detail-value">5.8 mg/L</div>
+                <div id="param-detail-status" class="param-detail-status status-good">Bom</div>
+            </div>
+            <div class="param-detail-body">
+                <div class="param-detail-chart">
+                    <canvas id="param-history-chart"></canvas>
+                </div>
+                <div class="param-detail-info">
+                    <h4>Informações</h4>
+                    <p>Último registro: <strong id="param-last-update">Hoje, 15:30</strong></p>
+                    <p>Média dos últimos 7 dias: <strong id="param-average">5.7 mg/L</strong></p>
+                    <p>Tendência dos últimos 30 dias: <strong id="param-trend"><span style="color: #28a745"><i class="fas fa-arrow-up"></i> Em alta</span></strong></p>
+                </div>
+                <div class="param-detail-actions">
+                    <button class="btn btn-primary">Ver histórico completo</button>
+                    <button class="btn btn-outline-primary">Exportar dados</button>
+                    <button class="btn btn-outline-primary">Ver relatório mensal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Página carregada');
+            
+            // Selecionar todos os botões de parâmetros
+            const paramButtons = document.querySelectorAll('.water-param-btn');
+            console.log('Botões encontrados:', paramButtons.length);
+            
+            // Adicionar evento de clique aos botões
+            paramButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    console.log('Botão clicado:', this);
+                    showParameterDetails(this);
+                });
+            });
+            
+            // Adicionar evento de clique ao botão de fechar do modal
+            const closeButton = document.querySelector('.param-modal-close');
+            if (closeButton) {
+                closeButton.addEventListener('click', function() {
+                    const modal = document.getElementById('param-detail-modal');
+                    if (modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Função para mostrar os detalhes do parâmetro
+            function showParameterDetails(button) {
+                console.log('Mostrando detalhes do parâmetro');
+                
+                // Obter informações do parâmetro
+                const paramName = button.querySelector('.param-name').textContent;
+                const paramValue = button.querySelector('.param-value').textContent;
+                const paramStatus = button.querySelector('.param-status').classList.contains('good') ? 'Bom' : 
+                                   button.querySelector('.param-status').classList.contains('warning') ? 'Atenção' : 'Crítico';
+                
+                console.log('Parâmetro:', paramName, 'Valor:', paramValue, 'Status:', paramStatus);
+                
+                // Determinar a classe de cor com base no status
+                let statusColorClass = '';
+                if (paramStatus === 'Bom') {
+                    statusColorClass = 'status-good';
+                } else if (paramStatus === 'Atenção') {
+                    statusColorClass = 'status-warning';
+                } else {
+                    statusColorClass = 'status-critical';
+                }
+                
+                // Atualizar o modal com os detalhes do parâmetro
+                const modal = document.getElementById('param-detail-modal');
+                if (!modal) {
+                    console.error('Modal não encontrado!');
+                    return;
+                }
+                
+                // Atualizar conteúdo do modal
+                document.getElementById('param-detail-title').textContent = paramName;
+                document.getElementById('param-detail-value').textContent = paramValue;
+                
+                // Atualizar status
+                const statusElement = document.getElementById('param-detail-status');
+                statusElement.className = 'param-detail-status ' + statusColorClass;
+                statusElement.textContent = paramStatus;
+                
+                // Exibir o modal
+                modal.style.display = 'flex';
+                
+                // Renderizar o gráfico após um pequeno atraso
+                setTimeout(renderChart, 300);
+            }
+            
+            // Função para renderizar o gráfico
+            function renderChart() {
+                console.log('Renderizando gráfico');
+                
+                const ctx = document.getElementById('param-history-chart');
+                if (!ctx) {
+                    console.error('Canvas para gráfico não encontrado!');
+                    return;
+                }
+                
+                // Destruir gráfico anterior se existir
+                if (window.paramChart) {
+                    window.paramChart.destroy();
+                }
+                
+                // Gerar dados para os últimos 30 dias
+                const labels = [];
+                const data = [];
+                
+                const today = new Date();
+                
+                for (let i = 29; i >= 0; i--) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() - i);
+                    
+                    const day = date.getDate();
+                    const month = date.getMonth() + 1;
+                    labels.push(`${day}/${month}`);
+                    
+                    // Gerar valor aleatório
+                    data.push(5 + Math.random() * 1.5);
+                }
+                
+                // Criar o gráfico
+                window.paramChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor',
+                            data: data,
+                            borderColor: '#0056b3',
+                            backgroundColor: 'rgba(0, 86, 179, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    maxTicksLimit: 10
+                                }
+                            },
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
